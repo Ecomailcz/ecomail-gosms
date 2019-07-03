@@ -96,6 +96,31 @@ class Client
         return $res;
     }
 
+    public function sendMultipleSms(array $phoneNumbers, string $message, ?int $channel): stdClass
+    {
+        if($channel === null) {
+            $channel = $this->default_channel;
+        }
+
+        foreach($phoneNumbers as $phoneNumber) {
+            if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber)) {
+                throw new InvalidNumber('Invalid recipient number format');
+            }
+        }
+
+        if (!is_string($message) || empty($message)) {
+            throw new InvalidFormat('Invalid message format');
+        }
+
+        $res = $this->makeRequest('POST', 'api/v1/messages', [
+            'message' => $message,
+            'recipients' => $phoneNumbers,
+            'channel' => $channel
+        ]);
+
+        return $res;
+    }
+
     private makeRequest(string $type, string $endpoint, ?array $params): stdClass
     {
         if($type === 'GET') {
