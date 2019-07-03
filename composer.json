@@ -1,7 +1,14 @@
 {
     "name": "ecomailcz/gosms-client",
     "description": "Client for GoSms.cz api",
+    "license": ["MIT"],
+    "prefer-stable": true,
     "require": {
         "guzzlehttp/guzzle": "~6.0"
-    }
+    },
+    "autoload": {
+		"psr-4": {
+			"EcomailGoSms\\": ["src/"]
+		}
+	},
 }
