@@ -4,7 +4,7 @@ namespace EcomailGoSms;
 
 use GuzzleHttp\Client;
 
-class Client
+class GoSmsClient
 {
 
     /**
