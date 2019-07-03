@@ -1,0 +1,7 @@
+{
+    "name": "ecomailcz/gosms-client",
+    "description": "Client for GoSms.cz api",
+    "require": {
+        "guzzlehttp/guzzle": "~6.0"
+    }
+}
