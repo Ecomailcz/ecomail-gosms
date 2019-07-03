@@ -73,7 +73,7 @@ class Client
         return $this;
     }
 
-    public function sendSms(string $phoneNumber, string $message, ?int $channel): stdClass
+    public function sendSms(string $phoneNumber, string $message, ?int $channel = null): stdClass
     {
         if($channel === null) {
             $channel = $this->default_channel;
