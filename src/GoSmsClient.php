@@ -52,7 +52,7 @@ class GoSmsClient
         $this->default_channel = $default_channel;
     }
 
-    public function authenticate(): Client
+    public function authenticate(): GoSmsClient
     {
         $res = $this->client->request('GET', 'oauth/v2/token', [
             'query' => [
