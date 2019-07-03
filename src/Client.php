@@ -96,7 +96,7 @@ class Client
         return $res;
     }
 
-    public function sendMultipleSms(array $phoneNumbers, string $message, ?int $channel): stdClass
+    public function sendMultipleSms(array $phoneNumbers, string $message, ?int $channel = null): stdClass
     {
         if($channel === null) {
             $channel = $this->default_channel;
