@@ -22,6 +22,13 @@ class Client
     private $client_secret;
 
     /**
+     * Default Channel
+     *
+     * @var int
+     */
+    private $default_channel;
+
+    /**
      * API key
      *
      * @var \GuzzleHttp\Client
@@ -35,13 +42,14 @@ class Client
      */
     private $token = null;
 
-    public function __construct(string $client_id, string $client_secret)
+    public function __construct(string $client_id, string $client_secret, int $default_channel)
     {
         $this->client = new Client([
             'base_uri' => 'https://app.gosms.cz',
         ]);
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
+        $this->default_channel = $default_channel;
     }
 
     public function authenticate(): Client
@@ -65,8 +73,20 @@ class Client
         return $this;
     }
 
-    public function sendSms(string $phoneNumber, string $message, int $channel): stdClass
+    public function sendSms(string $phoneNumber, string $message, ?int $channel): stdClass
     {
+        if($channel === null) {
+            $channel = $this->default_channel;
+        }
+
+        if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber)) {
+            throw new InvalidNumber('Invalid recipient number format');
+        }
+
+        if (!is_string($message) || empty($message)) {
+            throw new InvalidFormat('Invalid message format');
+        }
+
         $res = $this->makeRequest('POST', 'api/v1/messages', [
             'message' => $message,
             'recipients' => $phoneNumber,
