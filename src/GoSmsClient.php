@@ -137,7 +137,7 @@ class GoSmsClient
             ]);
         }
 
-        if($res->getStatusCode() !== 200) {
+        if($res->getStatusCode() !== 200 && $res->getStatusCode() !== 201) {
             throw new RequestException($res->getBody()->getContents());
         }
 
