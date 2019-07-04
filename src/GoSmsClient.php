@@ -3,6 +3,7 @@
 namespace EcomailGoSms;
 
 use GuzzleHttp\Client;
+use stdClass;
 
 class GoSmsClient
 {
