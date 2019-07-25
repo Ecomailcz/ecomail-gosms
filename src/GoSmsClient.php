@@ -80,7 +80,7 @@ class GoSmsClient
             $channel = $this->default_channel;
         }
 
-        if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber)) {
+        if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber) || preg_match('~^\+420[0-9]{8}$~', $phoneNumber)) {
             throw new InvalidNumber('Invalid recipient number format');
         }
 
@@ -104,7 +104,7 @@ class GoSmsClient
         }
 
         foreach($phoneNumbers as $phoneNumber) {
-            if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber)) {
+            if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber) || preg_match('~^\+420[0-9]{8}$~', $phoneNumber)) {
                 throw new InvalidNumber('Invalid recipient number format');
             }
         }
