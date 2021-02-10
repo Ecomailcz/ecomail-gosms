@@ -130,12 +130,20 @@ class GoSmsClient
                 'query' => $params
             ]);
         } elseif($type === 'POST') {
-            $res = $this->client->request('POST', $endpoint, [
-                'json' => $params,
-                'query' => [
-                    'access_token' => $this->token,
-                ],
-            ]);
+            try {
+                $res = $this->client->request('POST', $endpoint, [
+                    'json' => $params,
+                    'query' => [
+                        'access_token' => $this->token,
+                    ],
+                ]);
+            } catch (ClientException $e) {
+                if (strpos($e->getResponse()->getBody()->getContents(), 'Invalid Recipients') !== false) {
+                    throw new InvalidNumber('Invalid recipient number format');
+                }
+
+                throw $e;
+            }
         }
 
         if($res->getStatusCode() !== 200 && $res->getStatusCode() !== 201) {
