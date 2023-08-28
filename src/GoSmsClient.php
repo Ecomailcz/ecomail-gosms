@@ -122,7 +122,7 @@ class GoSmsClient
         return $res;
     }
 
-    private function makeRequest(string $type, string $endpoint, ?array $params): stdClass
+    public function makeRequest(string $type, string $endpoint, ?array $params): stdClass
     {
         if($type === 'GET') {
             $params['access_token'] = $this->token;
