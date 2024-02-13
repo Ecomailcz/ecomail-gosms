@@ -3,6 +3,8 @@
 namespace EcomailGoSms;
 
 use GuzzleHttp\Client;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberUtil;
 use stdClass;
 
 class GoSmsClient
@@ -80,7 +82,10 @@ class GoSmsClient
             $channel = $this->default_channel;
         }
 
-        if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber) || preg_match('~^\+420[0-9]{8}$~', $phoneNumber)) {
+        $phoneUtil = PhoneNumberUtil::getInstance();
+        try{
+            $phoneUtil->parse($phoneNumber);
+        } catch (NumberParseException) {
             throw new InvalidNumber('Invalid recipient number format');
         }
 
@@ -103,8 +108,11 @@ class GoSmsClient
             $channel = $this->default_channel;
         }
 
+        $phoneUtil = PhoneNumberUtil::getInstance();
         foreach($phoneNumbers as $phoneNumber) {
-            if (!preg_match('~^\+[0-9]{11,12}$~', $phoneNumber) || preg_match('~^\+420[0-9]{8}$~', $phoneNumber)) {
+            try{
+                $phoneUtil->parse($phoneNumber);
+            } catch (NumberParseException) {
                 throw new InvalidNumber('Invalid recipient number format');
             }
         }
