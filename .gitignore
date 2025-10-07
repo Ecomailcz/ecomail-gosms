@@ -1,3 +1,12 @@
 .idea/
 composer.lock
-vendor
+vendor/
+build/
+coverage-html/
+.env
+phpunit.xml
+todo.md
+.phpunit.result.cache
+.cursor/
+coverage.xml
+examples/

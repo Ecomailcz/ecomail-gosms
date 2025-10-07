@@ -1,0 +1,6 @@
+{
+  "status": "accepted",
+  "recipient": "string",
+  "custom_id": "string",
+  "link": "string"
+}
