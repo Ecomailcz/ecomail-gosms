@@ -6,21 +6,23 @@
     ],
     "require": {
         "php": "^8.4",
-        "giggsey/libphonenumber-for-php-lite": "^8.13.29 || ^9.0.15",
+        "giggsey/libphonenumber-for-php-lite": "^8.13.29 || ^9.0.21",
         "guzzlehttp/guzzle": "^7.10.0",
         "illuminate/support": "^9.0 || ^10.0 || ^11.0"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.48.2",
-        "laravel/pint": "^1.25.1",
+        "laravel/pint": "^1.26.0",
         "orchestra/testbench": "^7.0 || ^8.36",
-        "pekral/phpcs-rules": "^0.4.2",
-        "pekral/phpstan-rules": "^0.4.2",
-        "pekral/rector-rules": "^0.4.2",
+        "pekral/cursor-rules": "^0.1.4",
+        "pekral/phpcs-rules": "dev-master",
+        "pekral/phpstan-rules": "dev-master",
+        "pekral/rector-rules": "dev-master",
+        "pestphp/pest": "^2.36.0",
         "phpstan/phpstan-deprecation-rules": ">=2.0.3",
         "phpstan/phpstan-mockery": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0.7",
-        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan-phpunit": "^2.0.11",
+        "phpunit/phpunit": "^10.5.36",
         "roave/security-advisories": "dev-latest"
     },
     "minimum-stability": "dev",
@@ -39,6 +41,7 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "ergebnis/composer-normalize": true,
+            "pestphp/pest-plugin": true,
             "phpstan/extension-installer": true
         },
         "bump-after-update": true,
@@ -57,6 +60,11 @@
         }
     },
     "scripts": {
+        "post-update-cmd": [
+            "composer validate --no-check-all --strict",
+            "composer outdated -D",
+            "vendor/bin/cursor-rules install --force"
+        ],
         "analyse": [
             "echo \"🔍 Running PHPStan static analysis...\"",
             "vendor/bin/phpstan analyse --memory-limit=2G"
@@ -69,18 +77,11 @@
             "@rector-check",
             "@analyse",
             "@security-audit",
-            "@test",
-            "@coverage",
-            "echo \"✅ All checks completed!\""
+            "@test:coverage"
         ],
         "coverage": [
             "echo \"📊 Running code coverage analysis...\"",
-            "@test:coverage",
-            "@coverage:check"
-        ],
-        "coverage:check": [
-            "echo \"🔍 Checking coverage requirements...\"",
-            "php check-coverage.php"
+            "@test:coverage"
         ],
         "fix": [
             "echo \"🔧 Running all fixes...\"",
@@ -96,43 +97,39 @@
         ],
         "normalize-fix": [
             "echo \"📝 Running Composer normalize fix...\"",
-            "composer normalize"
+            "composer normalize || true"
         ],
         "phpcs-check": [
             "echo \"✅ Running PHP CodeSniffer check...\"",
-            "vendor/bin/phpcs src/ tests/ rector.php --standard=ruleset.xml"
+            "vendor/bin/phpcs --standard=ruleset.xml src/ tests/"
         ],
         "phpcs-fix": [
             "echo \"🔧 Running PHP CodeSniffer fix...\"",
-            "vendor/bin/phpcbf src/ tests/ rector.php --standard=ruleset.xml || true"
+            "vendor/bin/phpcbf --standard=ruleset.xml src/ tests/ || true"
         ],
         "pint-check": [
             "echo \"🎨 Running Laravel Pint check...\"",
-            "vendor/bin/pint src/ tests/ rector.php check-coverage.php --test"
+            "vendor/bin/pint src/ tests/ --test"
         ],
         "pint-fix": [
             "echo \"🎨 Running Laravel Pint fixes...\"",
-            "vendor/bin/pint src/ tests/ rector.php check-coverage.php"
+            "vendor/bin/pint src/ tests/"
         ],
         "rector-check": [
             "echo \"🔄 Running Rector check (dry-run)...\"",
-            "vendor/bin/rector process src/ tests/ rector.php --dry-run"
+            "vendor/bin/rector process --dry-run"
         ],
         "rector-fix": [
             "echo \"🔄 Running Rector fixes...\"",
-            "vendor/bin/rector  process src/ tests/ rector.php"
+            "vendor/bin/rector process"
         ],
         "security-audit": [
             "echo \"🔒 Running Composer security audit...\"",
             "composer audit --format=summary"
         ],
-        "test": [
-            "echo \"🧪 Running tests...\"",
-            "vendor/bin/phpunit --no-coverage"
-        ],
         "test:coverage": [
             "echo \"📊 Running coverage tests with 100% minimum...\"",
-            "php -dpcov.enabled=1 -dpcov.directory=src/ -dxdebug.mode=off vendor/bin/phpunit tests/ --coverage-clover=coverage.xml --coverage-html=coverage-html --coverage-text"
+            "php -dpcov.enabled=1 -dpcov.directory=. -dxdebug.mode=off vendor/bin/pest --coverage --coverage-filter=src --min=100"
         ]
     }
 }
