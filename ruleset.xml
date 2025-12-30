@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<ruleset name="Ecomail - GoSMS API Client">
+    <description>Custom PHPCS rules for GoSMS API Client</description>
+
+    <!-- Include pekral/phpcs-rules -->
+    <rule ref="vendor/pekral/phpcs-rules/ruleset.xml"/>
+
+    <!-- Show progress and use colors -->
+    <arg name="colors"/>
+    <arg value="p"/>
+
+    <!-- Check PHP files only -->
+    <arg name="extensions" value="php"/>
+</ruleset>
