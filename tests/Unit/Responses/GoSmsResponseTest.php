@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace EcomailGoSms\Tests\Unit\Responses;
 
-use AssertionError;
 use EcomailGoSms\Exceptions\InvalidResponseData;
 use EcomailGoSms\Responses\GoSmsResponse;
 use Iterator;
@@ -16,14 +15,6 @@ use Psr\Http\Message\StreamInterface;
 
 final class GoSmsResponseTest extends TestCase
 {
-
-    public function testGetResponse(): void
-    {
-        $responseMock = $this->createMockResponseInterface();
-        $testResponse = $this->createTestGoSmsResponse($responseMock);
-        
-        self::assertSame($responseMock, $testResponse->getResponse());
-    }
 
     #[DataProvider('jsonDataProvider')]
     public function testBodyContentsToArray(string $jsonData, bool $shouldThrowException): void
@@ -51,9 +42,9 @@ final class GoSmsResponseTest extends TestCase
     {
         $responseMock = $this->createMockResponseWithJsonData($jsonData);
         $testResponse = $this->createTestGoSmsResponse($responseMock);
-        
+
         if ($expectedValue === null) {
-            $this->expectException(AssertionError::class);
+            $this->expectException(InvalidResponseData::class);
             $testResponse->testGetStringByKey($key);
         } else {
             $result = $testResponse->testGetStringByKey($key);
@@ -66,9 +57,9 @@ final class GoSmsResponseTest extends TestCase
     {
         $responseMock = $this->createMockResponseWithJsonData($jsonData);
         $testResponse = $this->createTestGoSmsResponse($responseMock);
-        
+
         if ($expectedValue === null) {
-            $this->expectException(AssertionError::class);
+            $this->expectException(InvalidResponseData::class);
             $testResponse->testGetIntegerByKey($key);
         } else {
             $result = $testResponse->testGetIntegerByKey($key);
@@ -82,8 +73,23 @@ final class GoSmsResponseTest extends TestCase
         $responseMock = $this->createMockResponseWithJsonData($jsonData);
         $testResponse = $this->createTestGoSmsResponse($responseMock);
         $result = $testResponse->testGetDataByKey($key);
-        
+
         self::assertSame($expectedValue, $result);
+    }
+
+    #[DataProvider('arrayDataProvider')]
+    public function testGetArrayByKey(string $jsonData, string $key, mixed $expectedValue): void
+    {
+        $responseMock = $this->createMockResponseWithJsonData($jsonData);
+        $testResponse = $this->createTestGoSmsResponse($responseMock);
+
+        if ($expectedValue === null) {
+            $this->expectException(InvalidResponseData::class);
+            $testResponse->testGetArrayByKey($key);
+        } else {
+            $result = $testResponse->testGetArrayByKey($key);
+            self::assertSame($expectedValue, $result);
+        }
     }
 
     public function testBodyContentsToArrayCaching(): void
@@ -103,6 +109,14 @@ final class GoSmsResponseTest extends TestCase
         self::assertSame($result1, $result2);
         self::assertSame('value', $result1['key']);
         self::assertSame('value', $result2['key']);
+    }
+
+    public function testGetResponse(): void
+    {
+        $responseMock = $this->createMockResponseWithJsonData('{"key": "value"}');
+        $testResponse = $this->createTestGoSmsResponse($responseMock);
+
+        self::assertSame($responseMock, $testResponse->getResponse());
     }
 
     /**
@@ -136,6 +150,15 @@ final class GoSmsResponseTest extends TestCase
     /**
      * @return \Iterator<string, array{string, string, mixed}>
      */
+    public static function arrayDataProvider(): Iterator
+    {
+        yield 'valid array' => ['{"items": ["a", "b"], "name": "John"}', 'items', ['a', 'b']];
+        yield 'invalid type' => ['{"items": "not_array"}', 'items', null];
+    }
+
+    /**
+     * @return \Iterator<string, array{string, string, mixed}>
+     */
     public static function dataByKeyProvider(): Iterator
     {
         yield 'string value' => ['{"name": "John"}', 'name', 'John'];
@@ -146,20 +169,15 @@ final class GoSmsResponseTest extends TestCase
         yield 'missing key' => ['{"existing": "value"}', 'missing', null];
     }
 
-    private function createMockResponseInterface(): ResponseInterface
-    {
-        return Mockery::mock(ResponseInterface::class);
-    }
-
     private function createMockResponseWithJsonData(string $jsonData, bool $shouldThrowException = false): ResponseInterface
     {
         $responseMock = Mockery::mock(ResponseInterface::class);
         $bodyMock = Mockery::mock(StreamInterface::class);
-        
+
         $responseMock->allows('getBody')->andReturns($bodyMock);
         $responseMock->allows('getStatusCode')->andReturn($shouldThrowException ? 500 : 200);
         $bodyMock->allows('getContents')->andReturn($jsonData);
-        
+
         return $responseMock;
     }
 
@@ -204,9 +222,18 @@ final class TestGoSmsResponse extends GoSmsResponse
     /**
      * @throws \EcomailGoSms\Exceptions\InvalidResponseData
      */
-    public function testGetDataByKey(string $key): null|bool|float|int|string
+    public function testGetDataByKey(string $key): mixed
     {
         return $this->getDataByKey($key);
+    }
+
+    /**
+     * @return array<mixed, mixed>
+     * @throws \EcomailGoSms\Exceptions\InvalidResponseData
+     */
+    public function testGetArrayByKey(string $key): array
+    {
+        return $this->getArrayByKey($key);
     }
 
 }

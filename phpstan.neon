@@ -4,8 +4,8 @@ parameters:
         - src
         - tests
         - rector.php
-        - check-coverage.php
     tmpDir: build/phpstan
+    treatPhpDocTypesAsCertain: false
 
     bootstrapFiles:
         - vendor/autoload.php

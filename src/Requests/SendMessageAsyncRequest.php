@@ -4,16 +4,13 @@ declare(strict_types = 1);
 
 namespace EcomailGoSms\Requests;
 
+use EcomailGoSms\Message;
+
 final readonly class SendMessageAsyncRequest implements Request
 {
 
-    public function __construct(
-        private string $message,
-        private int $channelId,
-        private string $recipient,
-        private string $customId,
-        private ?string $expectedSendStart = null,
-    ) {
+    public function __construct(private Message $message)
+    {
     }
 
     /**
@@ -21,14 +18,19 @@ final readonly class SendMessageAsyncRequest implements Request
      */
     public function getOptions(): array
     {
+        $data = [
+            'channel' => $this->message->channelId,
+            'custom_id' => $this->message->customId,
+            'message' => $this->message->message,
+            'recipient' => $this->message->recipient,
+        ];
+
+        if ($this->message->expectedSendStart !== null) {
+            $data['expected_send_start'] = $this->message->expectedSendStart;
+        }
+
         return [
-            'form_params' => [
-                'channel' => $this->channelId,
-                'custom_id' => $this->customId,
-                'expected_send_start' => $this->expectedSendStart,
-                'message' => $this->message,
-                'recipient' => $this->recipient,
-            ],
+            'json' => $data,
         ];
     }
 

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace EcomailGoSms\Tests\Unit\Responses;
 
-use AssertionError;
+use EcomailGoSms\Exceptions\InvalidResponseData;
 use EcomailGoSms\Responses\AuthenticationResponse;
 use EcomailGoSms\Tests\GoSmsClientTestUtility;
 use Mockery;
@@ -24,17 +24,24 @@ final class AuthenticationResponseTest extends TestCase
         self::assertSame('string', $response->getAccessToken());
     }
 
+    public function testGetRefreshToken(): void
+    {
+        $response = $this->createAuthenticationResponse();
+
+        self::assertSame('string', $response->getRefreshToken());
+    }
+
     public function testGetTokenType(): void
     {
         $response = $this->createAuthenticationResponse();
-        
+
         self::assertSame('Bearer', $response->getTokenType());
     }
 
     public function testValidationError(): void
     {
         $response = $this->createAuthenticationInvalidResponse();
-        $this->expectException(AssertionError::class);
+        $this->expectException(InvalidResponseData::class);
         $response->getAccessToken();
     }
 

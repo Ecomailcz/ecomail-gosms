@@ -18,6 +18,7 @@ use Psr\Http\Message\ResponseInterface;
 use SensitiveParameter;
 use Throwable;
 
+use function in_array;
 use function sprintf;
 
 abstract class Client
@@ -38,10 +39,9 @@ abstract class Client
      * @throws \EcomailGoSms\Exceptions\BadRequest
      * @throws \Throwable
      */
-    public function refreshToken(string $accessToken): RefreshAccessTokenResponse
+    public function refreshToken(string $refreshToken): RefreshAccessTokenResponse
     {
-        $this->accessToken = $accessToken;
-        $request = new RefreshAccessTokenRequest($accessToken);
+        $request = new RefreshAccessTokenRequest($refreshToken);
 
         return new RefreshAccessTokenResponse($this->makeRequest($request));
     }
@@ -105,7 +105,7 @@ abstract class Client
      */
     private function handleExceptions(Throwable $throwable): void
     {
-        if ($throwable instanceof ClientException && $throwable->getResponse()->getStatusCode() === 400) {
+        if ($throwable instanceof ClientException && in_array($throwable->getResponse()->getStatusCode(), [400, 403], true)) {
             throw new BadRequest($throwable->getResponse());
         }
 

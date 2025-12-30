@@ -182,7 +182,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Run coverage tests
-        run: composer test:coverage
+        run: composer coverage
 
   audit-check:
     name: "🔒 Security Audit (PHP ${{ matrix.php-version }})"

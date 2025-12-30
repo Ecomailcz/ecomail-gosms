@@ -10,18 +10,21 @@ use Psr\Http\Message\ResponseInterface;
 
 use function assert;
 use function gettype;
+use function is_array;
 use function is_int;
 use function is_string;
 use function json_decode;
+use function json_encode;
 use function sprintf;
 
 abstract class GoSmsResponse
 {
 
-    private ?string $cachedBody = null;
+    private readonly string $responseBody;
 
-    public function __construct(protected ResponseInterface $response)
+    public function __construct(private readonly ResponseInterface $response)
     {
+        $this->responseBody = $response->getBody()->getContents();
     }
 
     public function getResponse(): ResponseInterface
@@ -36,14 +39,17 @@ abstract class GoSmsResponse
     protected function bodyContentsToArray(): array
     {
         try {
-            $this->cachedBody ??= $this->getResponse()->getBody()->getContents();
-            
             /** @var array<string, mixed>|null $decoded */
-            $decoded = json_decode($this->cachedBody, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($this->responseBody, true, 512, JSON_THROW_ON_ERROR);
 
-            return $decoded ?? [];
+            if (!is_array($decoded)) {
+                // Handle null JSON as empty array
+                return [];
+            }
+
+            return $decoded;
         } catch (JsonException) {
-            throw new InvalidResponseData($this->getResponse());
+            throw new InvalidResponseData($this->response);
         }
     }
 
@@ -53,7 +59,10 @@ abstract class GoSmsResponse
     protected function getStringByKey(string $key): string
     {
         $value = $this->getDataByKey($key);
-        assert(is_string($value), $this->getAssertDescription($key, $value));
+
+        if (!is_string($value)) {
+            throw new InvalidResponseData($this->response, $this->getAssertDescription($key, $value));
+        }
 
         return $value;
     }
@@ -64,7 +73,25 @@ abstract class GoSmsResponse
     protected function getIntegerByKey(string $key): int
     {
         $value = $this->getDataByKey($key);
-        assert(is_int($value), $this->getAssertDescription($key, $value));
+
+        if (!is_int($value)) {
+            throw new InvalidResponseData($this->response, $this->getAssertDescription($key, $value));
+        }
+
+        return $value;
+    }
+
+    /**
+     * @return array<mixed, mixed>
+     * @throws \EcomailGoSms\Exceptions\InvalidResponseData
+     */
+    protected function getArrayByKey(string $key): array
+    {
+        $value = $this->getDataByKey($key);
+
+        if (!is_array($value)) {
+            throw new InvalidResponseData($this->response, $this->getAssertDescription($key, $value));
+        }
 
         return $value;
     }
@@ -72,19 +99,30 @@ abstract class GoSmsResponse
     /**
      * @throws \EcomailGoSms\Exceptions\InvalidResponseData
      */
-    protected function getDataByKey(string $key): null|bool|float|int|string
+    protected function getDataByKey(string $key): mixed
     {
         $data = $this->bodyContentsToArray();
 
         $value = $data[$key] ?? null;
-        assert($value === null || is_bool($value) || is_float($value) || is_int($value) || is_string($value));
+        assert($value === null || is_bool($value) || is_float($value) || is_int($value) || is_string($value) || is_array($value));
 
         return $value;
     }
 
-    private function getAssertDescription(null|bool|float|int|string $key, null|bool|float|int|string $value): string
+    /**
+     * @throws \JsonException
+     */
+    private function getAssertDescription(string $key, mixed $value): string
     {
-        return sprintf('Invalid response data for key %s. Value is %s with type %s', $key, $value, gettype($value));
+        $valueForReport = is_array($value) ? json_encode($value, JSON_THROW_ON_ERROR) : $value;
+        $formattedValue = is_scalar($valueForReport) ? (string) $valueForReport : json_encode($valueForReport);
+
+        return sprintf(
+            'Invalid response data for key %s. Value is %s with type %s',
+            $key,
+            $formattedValue,
+            gettype($value),
+        );
     }
 
 }

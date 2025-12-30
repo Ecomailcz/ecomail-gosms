@@ -13,10 +13,26 @@ use function sprintf;
 abstract class GeneralException extends Exception
 {
 
-    public function __construct(private readonly ResponseInterface $response, ?Throwable $previous = null)
+    public function __construct(private readonly ResponseInterface $response, null|string|Throwable $messageOrPrevious = null)
     {
-        $message = $previous?->getMessage() ?? sprintf('"%s"', $this->response->getBody()->getContents());
-        $code = $previous?->getCode() ?? $this->response->getStatusCode();
+        if (is_string($messageOrPrevious)) {
+            $message = $messageOrPrevious;
+            $code = $this->response->getStatusCode();
+            $previous = null;
+        } elseif ($messageOrPrevious instanceof Throwable) {
+            $message = $messageOrPrevious->getMessage() !== ''
+                ? $messageOrPrevious->getMessage()
+                : sprintf(
+                    '"%s"',
+                    $this->response->getBody()->getContents(),
+                );
+            $code = (int) $messageOrPrevious->getCode() !== 0 ? (int) $messageOrPrevious->getCode() : $this->response->getStatusCode();
+            $previous = $messageOrPrevious;
+        } else {
+            $message = sprintf('"%s"', $this->response->getBody()->getContents());
+            $code = $this->response->getStatusCode();
+            $previous = null;
+        }
 
         parent::__construct($message, $code, $previous);
     }

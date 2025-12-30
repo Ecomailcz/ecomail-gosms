@@ -7,22 +7,20 @@
     "require": {
         "php": "^8.4",
         "giggsey/libphonenumber-for-php-lite": "^8.13.29 || ^9.0.21",
-        "guzzlehttp/guzzle": "^7.10.0",
-        "illuminate/support": "^9.0 || ^10.0 || ^11.0"
+        "guzzlehttp/guzzle": "^7.10.0"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.48.2",
         "laravel/pint": "^1.26.0",
-        "orchestra/testbench": "^7.0 || ^8.36",
-        "pekral/cursor-rules": "^0.1.4",
+        "orchestra/testbench": "^10.8",
+        "pekral/cursor-rules": "dev-master",
         "pekral/phpcs-rules": "dev-master",
         "pekral/phpstan-rules": "dev-master",
         "pekral/rector-rules": "dev-master",
-        "pestphp/pest": "^2.36.0",
+        "pestphp/pest": "^4.2",
         "phpstan/phpstan-deprecation-rules": ">=2.0.3",
         "phpstan/phpstan-mockery": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0.11",
-        "phpunit/phpunit": "^10.5.36",
         "roave/security-advisories": "dev-latest"
     },
     "minimum-stability": "dev",
@@ -77,11 +75,11 @@
             "@rector-check",
             "@analyse",
             "@security-audit",
-            "@test:coverage"
+            "@coverage"
         ],
         "coverage": [
             "echo \"📊 Running code coverage analysis...\"",
-            "@test:coverage"
+            "php -dpcov.enabled=1 -dpcov.directory=. -dxdebug.mode=off vendor/bin/pest --coverage --coverage-filter=src --min=100"
         ],
         "fix": [
             "echo \"🔧 Running all fixes...\"",
@@ -126,10 +124,6 @@
         "security-audit": [
             "echo \"🔒 Running Composer security audit...\"",
             "composer audit --format=summary"
-        ],
-        "test:coverage": [
-            "echo \"📊 Running coverage tests with 100% minimum...\"",
-            "php -dpcov.enabled=1 -dpcov.directory=. -dxdebug.mode=off vendor/bin/pest --coverage --coverage-filter=src --min=100"
         ]
     }
 }
