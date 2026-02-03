@@ -1,3 +1,43 @@
-.idea/
+# Composer
+/vendor/
 composer.lock
-vendor
+
+# AI
+.cursor/
+
+# Build
+build/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing
+/coverage/
+/.phpunit.result.cache
+/phpunit.xml
+
+# Laravel
+/bootstrap/cache/
+/storage/
+.env
+.env.local
+.env.*.local
+
+# Package specific
+examples/.gosms-token-cache.json
+
+
+# PHPUnit
+/.phpunit.cache
+coverage.xml
+/coverage-html
